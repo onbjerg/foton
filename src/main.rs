@@ -1,38 +1,18 @@
 extern crate lodepng;
 extern crate rand;
 
-use rand::Rng;
-
 mod core;
+mod scenery;
 
 use core::vec3::Vec3;
 use core::ray::Ray;
 use core::rgba::RGBA;
 
-fn hit_sphere(sphere_center: Vec3, radius: f32, ray: &Ray) -> f32 {
-    let oc = ray.origin - sphere_center;
-    let a = ray.direction.dot(&ray.direction);
-    let b = 2.0 * oc.dot(&ray.direction);
-    let c = oc.dot(&oc) - radius * radius;
-    let discriminant = b * b - 4.0 * a * c;
-
-    if discriminant < 0.0 {
-        -1.0
-    } else {
-        (-b - discriminant.sqrt()) / (2.0 * a)
-    }
-}
+use scenery::hitable::Hitable;
+use scenery::sphere::Sphere;
+use scenery::scene::Scene;
 
 fn color_for_ray(ray: &Ray) -> Vec3 {
-    let t = hit_sphere(Vec3::new(0.0, 0.0, -1.0), 0.5, &ray);
-    if t > 0.0 {
-        let normal = (ray.point_at_parameter(t) - Vec3::new(0.0, 0.0, -1.0)).normalize();
-        return 0.5 * Vec3::new(
-            255.0 * (normal.x + 1.0),
-            255.0 * (normal.y + 1.0),
-            255.0 * (normal.z + 1.0))
-    }
-
     let unit_vector = Vec3 {
         x: 1.0,
         y: 1.0,
@@ -48,13 +28,24 @@ fn color_for_ray(ray: &Ray) -> Vec3 {
 
     let c = (1f32 - t) * unit_vector + t * base_color;
 
-    255f32 * c
+    let mut scene = Scene::new();
+    scene.add_sphere(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5));
+    scene.add_sphere(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0));
+
+    match scene.hit(&ray, 0.0, 100.0) {
+        Some(hit) => 0.5 * Vec3::new(
+            255.0 * (hit.normal.x + 1.0),
+            255.0 * (hit.normal.y + 1.0),
+            255.0 * (hit.normal.z + 1.0)
+        ),
+        None => 255f32 * c
+    }
 }
 
 fn main() {
     // Constants
-    const WIDTH: usize = 1200;
-    const HEIGHT: usize = 600;
+    const WIDTH: usize = 600;
+    const HEIGHT: usize = 300;
     const SAMPLES: usize = 100;
 
     // The world is from (-2.0, -1.0, -1.0) to (2.0, 1.0, -1.0)
