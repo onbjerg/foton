@@ -1,0 +1,6 @@
+# IDE artifacts
+.idea
+**/*.rs.bk
+
+# Build artifacts
+/target
