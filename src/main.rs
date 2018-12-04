@@ -7,6 +7,7 @@ mod scenery;
 use core::vec3::Vec3;
 use core::ray::Ray;
 use core::rgba::RGBA;
+use core::camera::Camera;
 
 use scenery::hitable::Hitable;
 use scenery::sphere::Sphere;
@@ -48,33 +49,11 @@ fn main() {
     const HEIGHT: usize = 300;
     const SAMPLES: usize = 100;
 
-    // The world is from (-2.0, -1.0, -1.0) to (2.0, 1.0, -1.0)
-    // We start at the lower left corner and work our way up using offset vectors
-    const LOWER_LEFT_CORNER: Vec3 = Vec3 {
-        x: -2.0,
-        y: -1.0,
-        z: -1.0
-    };
-    const HORIZONTAL_OFFSET: Vec3 = Vec3 {
-        x: 4.0,
-        y: 0.0,
-        z: 0.0
-    };
-    const VERTICAL_OFFSET: Vec3 = Vec3 {
-        x: 0.0,
-        y: 2.0,
-        z: 0.0
-    };
-
-    // The camera is positioned at (0.0, 0.0, 0.0)
-    const CAMERA_ORIGIN: Vec3 = Vec3 {
-        x: 0.0,
-        y: 0.0,
-        z: 0.0
-    };
-
     // Image data buffer
     let mut data = [RGBA(0, 0, 0, 0); WIDTH * HEIGHT];
+
+    // Create camera
+    let camera = Camera::new();
 
     // Render scene
     for y in 0..HEIGHT {
@@ -88,15 +67,13 @@ fn main() {
                     let u: f32 = (x as f32 + rand::random::<f32>()) / WIDTH as f32;
                     let v: f32 = (y as f32 + rand::random::<f32>()) / HEIGHT as f32;
 
-                    let ray = Ray::new(
-                        CAMERA_ORIGIN,
-                        LOWER_LEFT_CORNER + u * HORIZONTAL_OFFSET + v * VERTICAL_OFFSET
-                    );
+                    let ray = camera.cast_ray(u, v);
 
                     color_at_point + color_for_ray(&ray)
                 }
             ) / (SAMPLES as f32);
 
+            // Write data to image buffer
             data[x + (HEIGHT - 1 - y) * WIDTH] = RGBA(
                 color_at_point.x as u8,
                 color_at_point.y as u8,
