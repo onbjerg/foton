@@ -44,8 +44,8 @@ fn color_for_ray(ray: &Ray, scene: &Scene, depth: u8) -> Vec3 {
 
 fn main() {
     // Constants
-    const WIDTH: usize = 800;
-    const HEIGHT: usize = 400;
+    const WIDTH: usize = 1200;
+    const HEIGHT: usize = 600;
     const SAMPLES: usize = 100;
 
     // Image data buffer
@@ -63,10 +63,12 @@ fn main() {
         albedo: Vec3::new(0.8, 0.8, 0.0)
     })));
     scene.add_sphere(Sphere::new(Vec3::new(1.0, 0.0, -1.0), 0.5, Material::Metal(Metal {
-        albedo: Vec3::new(0.8, 0.6, 0.2)
+        albedo: Vec3::new(0.8, 0.6, 0.2),
+        fuzz: 0.3
     })));
     scene.add_sphere(Sphere::new(Vec3::new(-1.0, 0.0, -1.0), 0.5, Material::Metal(Metal {
-        albedo: Vec3::new(0.8, 0.8, 0.8)
+        albedo: Vec3::new(0.8, 0.8, 0.8),
+        fuzz: 1.0
     })));
 
     // Render scene

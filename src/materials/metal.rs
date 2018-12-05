@@ -1,13 +1,12 @@
-extern crate rand;
-
 use ::core::ray::Ray;
 use ::core::vec3::Vec3;
 use ::scenery::hitable::Hit;
-use super::{Scatter, Scatterable};
+use super::{Scatter, Scatterable, random_point_in_sphere};
 
 #[derive(Clone, Copy)]
 pub struct Metal {
-    pub albedo: Vec3
+    pub albedo: Vec3,
+    pub fuzz: f32
 }
 
 fn reflect(v: &Vec3, normal: &Vec3) -> Vec3 {
@@ -20,7 +19,7 @@ impl Scatterable for Metal {
 
         if target.dot(&hit.normal) > 0.0 {
             Some(Scatter {
-                ray: Ray::new(hit.point, target),
+                ray: Ray::new(hit.point, target + self.fuzz * random_point_in_sphere()),
                 attenuation: self.albedo
             })
         } else {
