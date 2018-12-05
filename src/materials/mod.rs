@@ -5,6 +5,7 @@ use ::core::vec3::Vec3;
 use ::scenery::hitable::Hit;
 use self::lambertian::Lambertian;
 use self::metal::Metal;
+use self::diaelectric::Diaelectric;
 
 pub struct Scatter {
     pub ray: Ray,
@@ -18,14 +19,16 @@ pub trait Scatterable {
 #[derive(Clone, Copy)]
 pub enum Material {
     Lambertian(Lambertian),
-    Metal(Metal)
+    Metal(Metal),
+    Diaelectric(Diaelectric)
 }
 
 impl Scatterable for Material {
     fn scatter(&self, ray: &Ray, hit: &Hit) -> Option<Scatter> {
         match *self {
             Material::Lambertian(ref inner) => inner.scatter(&ray, &hit),
-            Material::Metal(ref inner) => inner.scatter(&ray, &hit)
+            Material::Metal(ref inner) => inner.scatter(&ray, &hit),
+            Material::Diaelectric(ref inner) => inner.scatter(&ray, &hit)
         }
     }
 }
@@ -47,3 +50,4 @@ pub fn random_point_in_sphere() -> Vec3 {
 
 pub mod lambertian;
 pub mod metal;
+pub mod diaelectric;

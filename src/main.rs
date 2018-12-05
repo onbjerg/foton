@@ -16,9 +16,10 @@ use scenery::scene::Scene;
 use materials::{Material, Scatterable};
 use materials::lambertian::Lambertian;
 use materials::metal::Metal;
+use materials::diaelectric::Diaelectric;
 
 fn color_for_ray(ray: &Ray, scene: &Scene, depth: u8) -> Vec3 {
-    let base_color = Vec3::new(0.0, 0.0, 1.0);
+    let base_color = Vec3::new(0.5, 0.7, 1.0);
     let unit_vector = Vec3::new(1.0, 1.0, 1.0);
     let unit_direction = ray.direction.normalize();
 
@@ -44,8 +45,8 @@ fn color_for_ray(ray: &Ray, scene: &Scene, depth: u8) -> Vec3 {
 
 fn main() {
     // Constants
-    const WIDTH: usize = 1200;
-    const HEIGHT: usize = 600;
+    const WIDTH: usize = 2000;
+    const HEIGHT: usize = 1000;
     const SAMPLES: usize = 100;
 
     // Image data buffer
@@ -57,19 +58,17 @@ fn main() {
     // Create scene
     let mut scene = Scene::new();
     scene.add_sphere(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5, Material::Lambertian(Lambertian {
-        albedo: Vec3::new(0.8, 0.3, 0.3)
+        albedo: Vec3::new(0.1, 0.2, 0.5)
     })));
     scene.add_sphere(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0, Material::Lambertian(Lambertian {
         albedo: Vec3::new(0.8, 0.8, 0.0)
     })));
     scene.add_sphere(Sphere::new(Vec3::new(1.0, 0.0, -1.0), 0.5, Material::Metal(Metal {
         albedo: Vec3::new(0.8, 0.6, 0.2),
-        fuzz: 0.3
-    })));
-    scene.add_sphere(Sphere::new(Vec3::new(-1.0, 0.0, -1.0), 0.5, Material::Metal(Metal {
-        albedo: Vec3::new(0.8, 0.8, 0.8),
         fuzz: 1.0
     })));
+    scene.add_sphere(Sphere::new(Vec3::new(-1.0, 0.0, -1.0), 0.5, Material::Diaelectric(Diaelectric {})));
+    scene.add_sphere(Sphere::new(Vec3::new(-1.0, 0.0, -1.0), -0.45, Material::Diaelectric(Diaelectric {})));
 
     // Render scene
     for y in 0..HEIGHT {
@@ -91,9 +90,9 @@ fn main() {
             // Write data to image buffer
             // Note that the square rooting is gamma correction
             data[x + (HEIGHT - 1 - y) * WIDTH] = (
-                (255.0 * color_at_point.x.sqrt()) as u8,
-                (255.0 * color_at_point.y.sqrt()) as u8,
-                (255.0 * color_at_point.z.sqrt()) as u8
+                (255.99 * color_at_point.x.sqrt()) as u8,
+                (255.99 * color_at_point.y.sqrt()) as u8,
+                (255.99 * color_at_point.z.sqrt()) as u8
             );
         }
     }
