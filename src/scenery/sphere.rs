@@ -1,17 +1,20 @@
 use ::core::vec3::Vec3;
 use ::core::ray::Ray;
+use ::materials::Material;
 use super::hitable::{Hit, Hitable};
 
 pub struct Sphere {
     centre: Vec3,
-    radius: f32
+    radius: f32,
+    material: Material
 }
 
 impl Sphere {
-    pub fn new (centre: Vec3, radius: f32) -> Sphere {
+    pub fn new (centre: Vec3, radius: f32, material: Material) -> Sphere {
         Sphere {
             centre,
-            radius
+            radius,
+            material
         }
     }
 }
@@ -25,12 +28,14 @@ impl Hitable for Sphere {
         let discriminant = b * b - a * c;
 
         if discriminant > 0.0 {
+            // TODO: Somehow clean up cus u suck
             let solution = (-b - (b * b - a * c).sqrt()) / a;
             if solution < t_max && solution > t_min {
                 return Some(Hit {
                     t: solution,
                     point: ray.point_at_parameter(solution),
-                    normal: (ray.point_at_parameter(solution) - self.centre) / self.radius
+                    normal: (ray.point_at_parameter(solution) - self.centre) / self.radius,
+                    material: self.material
                 });
             }
 
@@ -39,7 +44,8 @@ impl Hitable for Sphere {
                 return Some(Hit {
                     t: solution,
                     point: ray.point_at_parameter(solution),
-                    normal: (ray.point_at_parameter(solution) - self.centre) / self.radius
+                    normal: (ray.point_at_parameter(solution) - self.centre) / self.radius,
+                    material: self.material
                 });
             }
         }

@@ -3,6 +3,7 @@ extern crate rand;
 
 mod core;
 mod scenery;
+mod materials;
 
 use core::vec3::Vec3;
 use core::ray::Ray;
@@ -13,22 +14,11 @@ use scenery::hitable::Hitable;
 use scenery::sphere::Sphere;
 use scenery::scene::Scene;
 
-fn random_point_in_sphere() -> Vec3 {
-    let mut point = Vec3::new(0.0, 0.0, 0.0);
-    while {
-        // do
-        point = Vec3::new(rand::random(), rand::random(), rand::random()) - Vec3::new(1.0, 1.0, 1.0);
+use materials::{Material, Scatterable};
+use materials::lambertian::Lambertian;
+use materials::metal::Metal;
 
-        // while
-        point.squared_length() >= 1.0
-
-        // yes thanks rust, very beautiful do-while loops
-    } {};
-
-    point
-}
-
-fn color_for_ray(ray: &Ray, scene: &Scene) -> Vec3 {
+fn color_for_ray(ray: &Ray, scene: &Scene, depth: u8) -> Vec3 {
     let base_color = Vec3::new(0.0, 0.0, 1.0);
     let unit_vector = Vec3::new(1.0, 1.0, 1.0);
     let unit_direction = ray.direction.normalize();
@@ -38,13 +28,18 @@ fn color_for_ray(ray: &Ray, scene: &Scene) -> Vec3 {
 
     // Note that `t_min` is not exactly 0.0 to solve shadow acne
     match scene.hit(&ray, 0.001, std::f32::MAX) {
-        Some(hit) => 0.5 * color_for_ray(&Ray::new(
-            hit.point,
-            hit.normal + random_point_in_sphere()
-        ), &scene),
+        // TODO: Clean the scatter handling up a bit
+        Some(hit) => match hit.material.scatter(&ray, &hit) {
+            Some(scatter) => {
+                if depth < 50 {
+                    return scatter.attenuation * color_for_ray(&scatter.ray, &scene, depth + 1);
+                }
 
-        // Note that square rooting is for simple gamma correction
-        None => 255.0 * Vec3::new(c.x.sqrt(), c.y.sqrt(), c.z.sqrt())
+                Vec3::new(0.0, 0.0, 0.0)
+            },
+            _ => Vec3::new(0.0, 0.0, 0.0)
+        },
+        None => c
     }
 }
 
@@ -62,8 +57,18 @@ fn main() {
 
     // Create scene
     let mut scene = Scene::new();
-    scene.add_sphere(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5));
-    scene.add_sphere(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0));
+    scene.add_sphere(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5, Material::Lambertian(Lambertian {
+        albedo: Vec3::new(0.8, 0.3, 0.3)
+    })));
+    scene.add_sphere(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0, Material::Lambertian(Lambertian {
+        albedo: Vec3::new(0.8, 0.8, 0.0)
+    })));
+    scene.add_sphere(Sphere::new(Vec3::new(1.0, 0.0, -1.0), 0.5, Material::Metal(Metal {
+        albedo: Vec3::new(0.8, 0.6, 0.2)
+    })));
+    scene.add_sphere(Sphere::new(Vec3::new(-1.0, 0.0, -1.0), 0.5, Material::Metal(Metal {
+        albedo: Vec3::new(0.8, 0.8, 0.8)
+    })));
 
     // Render scene
     for y in 0..HEIGHT {
@@ -78,20 +83,24 @@ fn main() {
 
                     let ray = camera.cast_ray(u, v);
 
-                    color_at_point + color_for_ray(&ray, &scene)
+                    color_at_point + color_for_ray(&ray, &scene, 0)
                 }
             ) / (SAMPLES as f32);
 
             // Write data to image buffer
+            // Note that the square rooting is gamma correction
             data[x + (HEIGHT - 1 - y) * WIDTH] = RGBA(
-                color_at_point.x as u8,
-                color_at_point.y as u8,
-                color_at_point.z as u8,
+                (255.0 * color_at_point.x.sqrt()) as u8,
+                (255.0 * color_at_point.y.sqrt()) as u8,
+                (255.0 * color_at_point.z.sqrt()) as u8,
                 255
             );
         }
     }
 
     // Output image
-    lodepng::encode32_file("out.png", &data, WIDTH, HEIGHT);
+    match lodepng::encode32_file("out.png", &data, WIDTH, HEIGHT) {
+        Ok(_) => println!("Rendered scene to out.png"),
+        Err(e) => println!("{}", e)
+    }
 }

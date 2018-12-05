@@ -74,6 +74,14 @@ impl Sub for Vec3 {
     }
 }
 
+impl Mul for Vec3 {
+    type Output = Self;
+
+    fn mul(self, rhs: Vec3) -> Self {
+        Vec3::new(self.x * rhs.x, self.y * rhs.y, self.z * rhs.z)
+    }
+}
+
 impl Mul<f32> for Vec3 {
     type Output = Self;
 

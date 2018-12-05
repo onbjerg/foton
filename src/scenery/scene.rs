@@ -1,4 +1,3 @@
-use ::core::vec3::Vec3;
 use ::core::ray::Ray;
 use super::hitable::{Hit, Hitable};
 use super::sphere::Sphere;
@@ -18,10 +17,6 @@ impl Scene {
     pub fn add_sphere(&mut self, sphere: Sphere) {
         self.spheres.push(sphere);
     }
-
-    pub fn size(&self) -> usize {
-        self.spheres.len()
-    }
 }
 
 impl Hitable for Scene {
@@ -29,6 +24,7 @@ impl Hitable for Scene {
         self.spheres.iter().fold(
             None,
             |hit, s| {
+                // TODO: Somehow clean up so u dont suck
                 match hit {
                     Some(hit) => if let Some(h) = s.hit(ray, t_min, hit.t) {
                         Some(h)
