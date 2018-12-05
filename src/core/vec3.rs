@@ -27,16 +27,6 @@ impl Vec3 {
         self.squared_length().sqrt()
     }
 
-    pub fn unit (&self) -> Vec3 {
-        let k = 1f32 / self.length();
-
-        Vec3 {
-            x: self.x * k,
-            y: self.y * k,
-            z: self.z * k
-        }
-    }
-
     pub fn normalize (&self) -> Vec3 {
         Vec3 {
             x: self.x / self.length(),
