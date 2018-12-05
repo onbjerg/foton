@@ -7,7 +7,6 @@ mod materials;
 
 use core::vec3::Vec3;
 use core::ray::Ray;
-use core::rgba::RGBA;
 use core::camera::Camera;
 
 use scenery::hitable::Hitable;
@@ -50,7 +49,7 @@ fn main() {
     const SAMPLES: usize = 100;
 
     // Image data buffer
-    let mut data = [RGBA(0, 0, 0, 0); WIDTH * HEIGHT];
+    let mut data = [(0u8, 0u8, 0u8); WIDTH * HEIGHT];
 
     // Create camera
     let camera = Camera::new();
@@ -89,17 +88,16 @@ fn main() {
 
             // Write data to image buffer
             // Note that the square rooting is gamma correction
-            data[x + (HEIGHT - 1 - y) * WIDTH] = RGBA(
+            data[x + (HEIGHT - 1 - y) * WIDTH] = (
                 (255.0 * color_at_point.x.sqrt()) as u8,
                 (255.0 * color_at_point.y.sqrt()) as u8,
-                (255.0 * color_at_point.z.sqrt()) as u8,
-                255
+                (255.0 * color_at_point.z.sqrt()) as u8
             );
         }
     }
 
     // Output image
-    match lodepng::encode32_file("out.png", &data, WIDTH, HEIGHT) {
+    match lodepng::encode24_file("out.png", &data, WIDTH, HEIGHT) {
         Ok(_) => println!("Rendered scene to out.png"),
         Err(e) => println!("{}", e)
     }
