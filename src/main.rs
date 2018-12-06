@@ -43,6 +43,88 @@ fn color_for_ray(ray: &Ray, scene: &Scene, depth: u8) -> Vec3 {
     }
 }
 
+fn make_scene() -> Scene {
+    let mut scene = Scene::new();
+    let ground = Sphere::new(
+        Vec3::new(0.0, -1000.0, 0.0),
+        1000.0,
+        Material::Lambertian(Lambertian {
+            albedo: Vec3::new(0.5, 0.5, 0.5)
+        })
+    );
+    scene.add_sphere(ground);
+
+    for i in -11..11 {
+        for j in -11..11 {
+            let material: f32 = rand::random();
+            let sphere_center = Vec3::new(
+                (i as f32) + 0.9 * rand::random::<f32>(),
+                0.2,
+                (j as f32) + 0.9 * rand::random::<f32>()
+            );
+            if (sphere_center - Vec3::new(0.4, 0.2, 0.0)).length() > 0.9 {
+                let sphere = match material {
+                    m if m < 0.8 => Sphere::new(
+                        sphere_center,
+                        0.2,
+                        Material::Lambertian(Lambertian {
+                            albedo: Vec3::new(rand::random(), rand::random(), rand::random())
+                        })
+                    ),
+                    m if m < 0.95 => Sphere::new(
+                        sphere_center,
+                        0.2,
+                        Material::Metal(Metal {
+                            albedo: 0.5 * Vec3::new(
+                                1.0 + rand::random::<f32>(),
+                                1.0 + rand::random::<f32>(),
+                                1.0 + rand::random::<f32>()
+                            ),
+                            fuzz: rand::random()
+                        })
+                    ),
+                    _ => Sphere::new(
+                        sphere_center,
+                        0.2,
+                        Material::Diaelectric(Diaelectric {})
+                    )
+                };
+                scene.add_sphere(sphere);
+            }
+        }
+    }
+
+    // Add 3 big center spheres
+    scene.add_sphere(
+        Sphere::new(
+            Vec3::new(0.0, 1.0, 0.0),
+            1.0,
+            Material::Diaelectric(Diaelectric {})
+        )
+    );
+    scene.add_sphere(
+        Sphere::new(
+            Vec3::new(-4.0, 1.0, 0.0),
+            1.0,
+            Material::Lambertian(Lambertian {
+                albedo: Vec3::new(0.4, 0.4, 0.2)
+            })
+        )
+    );
+    scene.add_sphere(
+        Sphere::new(
+            Vec3::new(4.0, 1.0, 0.0),
+            1.0,
+            Material::Metal(Metal {
+                albedo: Vec3::new(0.7, 0.6, 0.5),
+                fuzz: 0.0
+            })
+        )
+    );
+
+    scene
+}
+
 fn main() {
     // Constants
     const WIDTH: usize = 2000;
@@ -62,19 +144,7 @@ fn main() {
     );
 
     // Create scene
-    let mut scene = Scene::new();
-    scene.add_sphere(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5, Material::Lambertian(Lambertian {
-        albedo: Vec3::new(0.1, 0.2, 0.5)
-    })));
-    scene.add_sphere(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0, Material::Lambertian(Lambertian {
-        albedo: Vec3::new(0.8, 0.8, 0.0)
-    })));
-    scene.add_sphere(Sphere::new(Vec3::new(1.0, 0.0, -1.0), 0.5, Material::Metal(Metal {
-        albedo: Vec3::new(0.8, 0.6, 0.2),
-        fuzz: 1.0
-    })));
-    scene.add_sphere(Sphere::new(Vec3::new(-1.0, 0.0, -1.0), 0.5, Material::Diaelectric(Diaelectric {})));
-    scene.add_sphere(Sphere::new(Vec3::new(-1.0, 0.0, -1.0), -0.45, Material::Diaelectric(Diaelectric {})));
+    let scene = make_scene();
 
     // Render scene
     for y in 0..HEIGHT {
