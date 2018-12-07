@@ -7,6 +7,7 @@ use super::{Scatter, Scatterable};
 
 #[derive(Clone, Copy)]
 pub struct Diaelectric {
+    pub refraction_index: f32
 }
 
 /// Calculate the probability of reflection for a material at an angle
@@ -38,7 +39,7 @@ fn refract (v: &Vec3, normal: &Vec3, ni_over_nt: f32) -> Option<Vec3> {
 impl Scatterable for Diaelectric {
     fn scatter(&self, ray: &Ray, hit: &Hit) -> Option<Scatter> {
         let attenuation = Vec3::new(1.0, 1.0, 1.0);
-        let refraction_index = 1.5;
+        let refraction_index = self.refraction_index;
 
         let params: (Vec3, f32, f32) = {
             if ray.direction.dot(&hit.normal) > 0.0 {
