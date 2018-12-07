@@ -7,3 +7,4 @@ A small-ish super naive implementation of a ray tracer in Rust based on [a book 
 ## Versions
 
 - [One weekend](https://github.com/onbjerg/foton/tree/one-weekend): Naive single-threaded ray tracer with three types of materials and global illumination only.
+- [One weekend (multi-threaded)](https://github.com/onbjerg/foton/tree/one-weekend-rayon): Naive multi-threaded ray tracer with three types of materials and global illumination only.
