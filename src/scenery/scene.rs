@@ -23,7 +23,8 @@ impl Hitable for Scene {
     fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<Hit> {
         self.spheres.iter().fold(
             None,
-            |hit, s| s.hit(ray, t_min, hit.t).or(hit)
-        })
+            |hit, s|
+                s.hit(ray, t_min, hit.as_ref().map_or(t_max, |h| h.t)).or(hit)
+        )
     }
 }
