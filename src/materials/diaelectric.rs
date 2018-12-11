@@ -57,23 +57,18 @@ impl Scatterable for Diaelectric {
             }
         };
 
-        // TODO: Clean up maybe
-        match refract(&ray.direction, &params.0, params.1) {
-            Some(refracted) => if rand::random::<f32>() < shlick(params.2, refraction_index) {
-                Some(Scatter {
-                    ray: Ray::new(hit.point, reflect(&ray.direction, &hit.normal)),
-                    attenuation
-                })
-            } else {
-                Some(Scatter {
-                    ray: Ray::new(hit.point, refracted),
-                    attenuation
-                })
-            },
-            None => Some(Scatter {
-                ray: Ray::new(hit.point, reflect(&ray.direction, &hit.normal)),
-                attenuation
-            })
-        }
+        let ray_direction = match refract(
+            &ray.direction,
+            &params.0,
+            params.1
+        ) {
+            Some(refracted) if rand::random::<f32>() > shlick(params.2, refraction_index) => refracted,
+            _ => reflect(&ray.direction, &hit.normal)
+        };
+
+        Some(Scatter {
+            ray: Ray::new(hit.point, ray_direction),
+            attenuation
+        })
     }
 }
