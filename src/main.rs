@@ -24,18 +24,12 @@ use materials::diaelectric::Diaelectric;
 fn color_for_ray(ray: &Ray, scene: &Scene, depth: u8) -> Vec3 {
     // Note that `t_min` is not exactly 0.0 to solve shadow acne
     match scene.hit(&ray, 0.001, std::f32::MAX) {
-        // TODO: Clean the scatter handling up a bit
-        Some(hit) => match hit.material.scatter(&ray, &hit) {
-            Some(scatter) => {
-                if depth < 50 {
-                    return scatter.attenuation * color_for_ray(&scatter.ray, &scene, depth + 1);
-                }
-
-                Vec3::new(0.0, 0.0, 0.0)
-            },
-            _ => Vec3::new(0.0, 0.0, 0.0)
-        },
-        None => {
+        Some(ref hit) if depth < 50 => hit.material.scatter(&ray, hit).map_or(
+            Vec3::new(0.0, 0.0, 0.0),
+            |scatter| scatter.attenuation * color_for_ray(&scatter.ray, &scene, depth + 1)
+        ),
+        Some(_) if depth > 50 => Vec3::new(0.0, 0.0, 0.0),
+        _ => {
             let base_color = Vec3::new(0.5, 0.7, 1.0);
             let unit_vector = Vec3::new(1.0, 1.0, 1.0);
             let unit_direction = ray.direction.normalize();
