@@ -27,3 +27,87 @@ impl Hitable for Scene {
         )
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::scenery::sphere::Sphere;
+    use crate::core::vec3::Vec3;
+    use crate::materials::lambertian::Lambertian;
+
+    #[test]
+    fn empty_scene_has_no_hits() {
+        let scene = Scene::new();
+        let ray = Ray::new(
+            Vec3::new(0.0, 0.0, 0.0),
+            Vec3::new(0.0, 0.0, 0.0)
+        );
+
+        assert!(scene.hit(&ray, 0.0, 100.0).is_none());
+    }
+
+    #[test]
+    fn no_hit() {
+        let mut scene = Scene::new();
+        scene.add_sphere(Box::new(Sphere::new(
+            Vec3::new(1.0, 1.0, -1.0),
+            0.5,
+            Box::new(Lambertian {
+                albedo: Vec3::new(0.0, 0.0, 0.0)
+            })
+        )));
+
+        let ray = Ray::new(
+            Vec3::new(0.0, 0.0, 0.0),
+            Vec3::new(0.0, 0.0, -1.0)
+        );
+
+        assert!(scene.hit(&ray, 0.0, 100.0).is_none());
+    }
+
+    #[test]
+    fn hit() {
+        let mut scene = Scene::new();
+        scene.add_sphere(Box::new(Sphere::new(
+            Vec3::new(1.0, 1.0, -1.0),
+            0.5,
+            Box::new(Lambertian {
+                albedo: Vec3::new(0.0, 0.0, 0.0)
+            })
+        )));
+
+        let ray = Ray::new(
+            Vec3::new(0.0, 0.0, 0.0),
+            Vec3::new(1.0, 1.0, -1.0)
+        );
+
+        assert!(scene.hit(&ray, 0.0, 100.0).is_some());
+    }
+
+    #[test]
+    fn hit_closest_object() {
+        let mut scene = Scene::new();
+        scene.add_sphere(Box::new(Sphere::new(
+            Vec3::new(1.0, 1.0, -1.0),
+            0.5,
+            Box::new(Lambertian {
+                albedo: Vec3::new(0.0, 0.0, 0.0)
+            })
+        )));
+        scene.add_sphere(Box::new(Sphere::new(
+            Vec3::new(1.0, 1.0, -1.5),
+            0.5,
+            Box::new(Lambertian {
+                albedo: Vec3::new(0.0, 0.0, 0.0)
+            })
+        )));
+
+        let ray = Ray::new(
+            Vec3::new(0.0, 0.0, 0.0),
+            Vec3::new(1.0, 1.0, -2.0)
+        );
+
+        assert!(scene.hit(&ray, 0.0, 100.0).is_some());
+        assert_eq!(scene.hit(&ray, 0.0, 100.0).unwrap().t, 0.6666667);
+    }
+}
