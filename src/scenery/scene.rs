@@ -1,27 +1,26 @@
 use ::core::ray::Ray;
 use super::hitable::{Hit, Hitable};
-use super::sphere::Sphere;
 
 pub struct Scene {
-    spheres: Vec<Sphere>
+    scenery: Vec<Box<dyn Hitable>>
 }
 
 impl Scene {
     pub fn new() -> Scene {
-        let spheres: Vec<Sphere> = Vec::new();
+        let scenery: Vec<Box<dyn Hitable>> = Vec::new();
         Scene {
-            spheres
+            scenery
         }
     }
 
-    pub fn add_sphere(&mut self, sphere: Sphere) {
-        self.spheres.push(sphere);
+    pub fn add_sphere(&mut self, obj: Box<dyn Hitable>) {
+        self.scenery.push(obj);
     }
 }
 
 impl Hitable for Scene {
     fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<Hit> {
-        self.spheres.iter().fold(
+        self.scenery.iter().fold(
             None,
             |hit, s|
                 s.hit(ray, t_min, hit.as_ref().map_or(t_max, |h| h.t)).or(hit)
@@ -32,9 +31,9 @@ impl Hitable for Scene {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use ::core::vec3::Vec3;
-    use ::materials::Material;
-    use ::materials::lambertian::Lambertian;
+    use crate::scenery::sphere::Sphere;
+    use crate::core::vec3::Vec3;
+    use crate::materials::lambertian::Lambertian;
 
     #[test]
     fn empty_scene_has_no_hits() {
@@ -50,13 +49,13 @@ mod tests {
     #[test]
     fn no_hit() {
         let mut scene = Scene::new();
-        scene.add_sphere(Sphere::new(
+        scene.add_sphere(Box::new(Sphere::new(
             Vec3::new(1.0, 1.0, -1.0),
             0.5,
-            Material::Lambertian(Lambertian {
+            Box::new(Lambertian {
                 albedo: Vec3::new(0.0, 0.0, 0.0)
             })
-        ));
+        )));
 
         let ray = Ray::new(
             Vec3::new(0.0, 0.0, 0.0),
@@ -69,13 +68,13 @@ mod tests {
     #[test]
     fn hit() {
         let mut scene = Scene::new();
-        scene.add_sphere(Sphere::new(
+        scene.add_sphere(Box::new(Sphere::new(
             Vec3::new(1.0, 1.0, -1.0),
             0.5,
-            Material::Lambertian(Lambertian {
+            Box::new(Lambertian {
                 albedo: Vec3::new(0.0, 0.0, 0.0)
             })
-        ));
+        )));
 
         let ray = Ray::new(
             Vec3::new(0.0, 0.0, 0.0),
@@ -88,20 +87,20 @@ mod tests {
     #[test]
     fn hit_closest_object() {
         let mut scene = Scene::new();
-        scene.add_sphere(Sphere::new(
+        scene.add_sphere(Box::new(Sphere::new(
             Vec3::new(1.0, 1.0, -1.0),
             0.5,
-            Material::Lambertian(Lambertian {
+            Box::new(Lambertian {
                 albedo: Vec3::new(0.0, 0.0, 0.0)
             })
-        ));
-        scene.add_sphere(Sphere::new(
+        )));
+        scene.add_sphere(Box::new(Sphere::new(
             Vec3::new(1.0, 1.0, -1.5),
             0.5,
-            Material::Lambertian(Lambertian {
+            Box::new(Lambertian {
                 albedo: Vec3::new(0.0, 0.0, 0.0)
             })
-        ));
+        )));
 
         let ray = Ray::new(
             Vec3::new(0.0, 0.0, 0.0),

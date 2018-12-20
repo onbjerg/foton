@@ -1,16 +1,16 @@
 use ::core::vec3::Vec3;
 use ::core::ray::Ray;
-use ::materials::Material;
+use ::materials::Scatterable;
 use super::hitable::{Hit, Hitable};
 
 pub struct Sphere {
     centre: Vec3,
     radius: f32,
-    material: Material
+    material: Box<dyn Scatterable>
 }
 
 impl Sphere {
-    pub fn new (centre: Vec3, radius: f32, material: Material) -> Sphere {
+    pub fn new (centre: Vec3, radius: f32, material: Box<dyn Scatterable>) -> Sphere {
         Sphere {
             centre,
             radius,
@@ -35,7 +35,7 @@ impl Hitable for Sphere {
                     t: solution,
                     point: ray.point_at_parameter(solution),
                     normal: (ray.point_at_parameter(solution) - self.centre) / self.radius,
-                    material: self.material
+                    material: &self.material
                 });
             }
 
@@ -45,7 +45,7 @@ impl Hitable for Sphere {
                     t: solution,
                     point: ray.point_at_parameter(solution),
                     normal: (ray.point_at_parameter(solution) - self.centre) / self.radius,
-                    material: self.material
+                    material: &self.material
                 });
             }
         }
