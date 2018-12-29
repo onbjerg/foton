@@ -13,8 +13,8 @@ impl Scene {
         }
     }
 
-    pub fn add_sphere(&mut self, obj: Box<dyn Hitable>) {
-        self.scenery.push(obj);
+    pub fn add_object<T: Hitable + 'static>(&mut self, obj: T) {
+        self.scenery.push(Box::new(obj));
     }
 }
 

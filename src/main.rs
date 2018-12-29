@@ -16,7 +16,6 @@ use scenery::hitable::Hitable;
 use scenery::sphere::Sphere;
 use scenery::scene::Scene;
 
-use materials::Scatterable;
 use materials::lambertian::Lambertian;
 use materials::metal::Metal;
 use materials::diaelectric::Diaelectric;
@@ -43,14 +42,13 @@ fn color_for_ray(ray: &Ray, scene: &Scene, depth: u8) -> Vec3 {
 
 fn make_scene() -> Scene {
     let mut scene = Scene::new();
-    let ground = Sphere::new(
+    scene.add_object(Sphere::new(
         Vec3::new(0.0, -1000.0, 0.0),
         1000.0,
-        Box::new(Lambertian {
+        Lambertian {
             albedo: Vec3::new(0.5, 0.5, 0.5)
-        })
-    );
-    scene.add_sphere(Box::new(ground));
+        }
+    ));
 
     for i in -11..11 {
         for j in -11..11 {
@@ -61,58 +59,59 @@ fn make_scene() -> Scene {
                 (j as f32) + 0.9 * rand::random::<f32>()
             );
             if (sphere_center - Vec3::new(0.4, 0.2, 0.0)).length() > 0.9 {
-                let material: Box<dyn Scatterable> = match material_chooser {
-                    m if m < 0.8 => Box::new(Lambertian {
+                if material_chooser < 0.8 {
+                    scene.add_object(Sphere::new(
+                    sphere_center,
+                    0.2,
+                    Lambertian {
                         albedo: Vec3::new(rand::random(), rand::random(), rand::random())
-                    }),
-                    m if m < 0.95 => Box::new(Metal {
+                    }));
+                } else if material_chooser < 0.95 {
+                    scene.add_object(Sphere::new(
+                    sphere_center,
+                    0.2,
+                    Metal {
                         albedo: 0.5 * Vec3::new(
                             1.0 + rand::random::<f32>(),
                             1.0 + rand::random::<f32>(),
                             1.0 + rand::random::<f32>()
                         ),
                         fuzz: rand::random()
-                    }),
-                    _ => Box::new(Diaelectric {
+                    }));
+                } else {
+                    scene.add_object(Sphere::new(
+                    sphere_center,
+                    0.2,
+                    Diaelectric {
                         refraction_index: rand::random()
-                    })
+                    }));
                 };
-
-                scene.add_sphere(Box::new(
-                    Sphere::new(sphere_center, 0.2, material)
-                ));
             }
         }
     }
 
     // Add 3 big center spheres
-    scene.add_sphere(Box::new(
-        Sphere::new(
-            Vec3::new(0.0, 1.0, 0.0),
-            1.0,
-            Box::new(Diaelectric {
-                refraction_index: 1.0
-            })
-        )
+    scene.add_object(Sphere::new(
+        Vec3::new(0.0, 1.0, 0.0),
+        1.0,
+        Diaelectric {
+            refraction_index: 1.0
+        }
     ));
-    scene.add_sphere(Box::new(
-        Sphere::new(
-            Vec3::new(-4.0, 1.0, 0.0),
-            1.0,
-            Box::new(Lambertian {
-                albedo: Vec3::new(0.4, 0.4, 0.2)
-            })
-        )
+    scene.add_object(Sphere::new(
+        Vec3::new(-4.0, 1.0, 0.0),
+        1.0,
+        Lambertian {
+            albedo: Vec3::new(0.4, 0.4, 0.2)
+        }
     ));
-    scene.add_sphere(Box::new(
-        Sphere::new(
-            Vec3::new(4.0, 1.0, 0.0),
-            1.0,
-            Box::new(Metal {
-                albedo: Vec3::new(0.7, 0.6, 0.5),
-                fuzz: 0.0
-            })
-        )
+    scene.add_object(Sphere::new(
+        Vec3::new(4.0, 1.0, 0.0),
+        1.0,
+        Metal {
+            albedo: Vec3::new(0.7, 0.6, 0.5),
+            fuzz: 0.0
+        }
     ));
 
     scene
@@ -122,7 +121,7 @@ fn main() {
     // Constants
     const WIDTH: usize = 1280;
     const HEIGHT: usize = 720;
-    const SAMPLES: usize = 100;
+    const SAMPLES: usize = 10;
 
     // Image data buffer
     let mut data = [(0u8, 0u8, 0u8); WIDTH * HEIGHT];

@@ -10,11 +10,11 @@ pub struct Sphere {
 }
 
 impl Sphere {
-    pub fn new (centre: Vec3, radius: f32, material: Box<dyn Scatterable>) -> Sphere {
+    pub fn new<T: Scatterable + 'static>(centre: Vec3, radius: f32, material: T) -> Sphere {
         Sphere {
             centre,
             radius,
-            material
+            material: Box::new(material)
         }
     }
 }
