@@ -129,10 +129,10 @@ fn main() {
 
     // Create camera
     let camera = Camera::new(
-        Vec3::new(5.0, 5.0, 5.0),
-        Vec3::new(0.0, 0.0, -1.0),
+        Vec3::new(13.0, 2.0, 3.0),
+        Vec3::new(0.0, 0.0, 0.0),
         Vec3::new(0.0, 1.0, 0.0),
-        45.0,
+        20.0,
         (WIDTH as f32) / (HEIGHT as f32)
     );
 
