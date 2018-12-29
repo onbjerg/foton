@@ -28,28 +28,20 @@ impl Hitable for Sphere {
         let discriminant = b * b - a * c;
 
         if discriminant > 0.0 {
-            // TODO: Somehow clean up cus u suck
-            let solution = (-b - (b * b - a * c).sqrt()) / a;
-            if solution < t_max && solution > t_min {
-                return Some(Hit {
-                    t: solution,
-                    point: ray.point_at_parameter(solution),
-                    normal: (ray.point_at_parameter(solution) - self.centre) / self.radius,
+            [
+                (-b - (b * b - a * c).sqrt()) / a,
+                (-b + (b * b - a * c).sqrt()) / a
+            ]
+                .iter()
+                .find(|solution| **solution < t_max && **solution > t_min)
+                .map(|solution| Hit {
+                    t: *solution,
+                    point: ray.point_at_parameter(*solution),
+                    normal: (ray.point_at_parameter(*solution) - self.centre) / self.radius,
                     material: &self.material
-                });
-            }
-
-            let solution = (-b + (b * b - a * c).sqrt()) / a;
-            if solution < t_max && solution > t_min {
-                return Some(Hit {
-                    t: solution,
-                    point: ray.point_at_parameter(solution),
-                    normal: (ray.point_at_parameter(solution) - self.centre) / self.radius,
-                    material: &self.material
-                });
-            }
+                })
+        } else {
+            None
         }
-
-        None
     }
 }
