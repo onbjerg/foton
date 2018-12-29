@@ -119,9 +119,9 @@ fn make_scene() -> Scene {
 
 fn main() {
     // Constants
-    const WIDTH: usize = 1280;
-    const HEIGHT: usize = 720;
-    const SAMPLES: usize = 10;
+    const WIDTH: usize = 640;
+    const HEIGHT: usize = 360;
+    const SAMPLES: usize = 100;
 
     // Image data buffer
     let mut data = [(0u8, 0u8, 0u8); WIDTH * HEIGHT];
