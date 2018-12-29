@@ -52,8 +52,8 @@ fn make_scene() -> Scene {
     );
     scene.add_sphere(Box::new(ground));
 
-    for i in -22..22 {
-        for j in -22..22 {
+    for i in -11..11 {
+        for j in -11..11 {
             let material_chooser: f32 = rand::random();
             let sphere_center = Vec3::new(
                 (i as f32) + 0.9 * rand::random::<f32>(),
