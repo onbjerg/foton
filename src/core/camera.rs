@@ -1,5 +1,5 @@
-use super::vec3::Vec3;
 use super::ray::Ray;
+use super::vec3::Vec3;
 
 pub struct Camera {
     lower_left_corner: Vec3,
@@ -7,7 +7,7 @@ pub struct Camera {
     vertical_offset: Vec3,
     origin: Vec3,
     lens_radius: f32,
-    ortho: [Vec3; 3]
+    ortho: [Vec3; 3],
 }
 
 impl Camera {
@@ -19,7 +19,7 @@ impl Camera {
         fov: f32,
         aspect: f32,
         aperture: f32,
-        focus_distance: f32
+        focus_distance: f32,
     ) -> Camera {
         let lens_radius = aperture / 2.0;
 
@@ -34,12 +34,15 @@ impl Camera {
         let v = w.cross(&u);
 
         Camera {
-            lower_left_corner: look_from - half_width * u * focus_distance - half_height * v * focus_distance - w * focus_distance,
+            lower_left_corner: look_from
+                - half_width * u * focus_distance
+                - half_height * v * focus_distance
+                - w * focus_distance,
             horizontal_offset: 2.0 * half_width * u * focus_distance,
             vertical_offset: 2.0 * half_height * v * focus_distance,
             origin: look_from,
-            ortho: [w, u ,v],
-            lens_radius
+            ortho: [w, u, v],
+            lens_radius,
         }
     }
 
@@ -49,7 +52,9 @@ impl Camera {
 
         Ray::new(
             self.origin + offset,
-            self.lower_left_corner + s * self.horizontal_offset + t * self.vertical_offset - self.origin - offset
+            self.lower_left_corner + s * self.horizontal_offset + t * self.vertical_offset
+                - self.origin
+                - offset,
         )
     }
 }
@@ -59,7 +64,7 @@ fn random_point_in_unit_disk() -> Vec3 {
         let p = 2.0 * Vec3::new(rand::random(), rand::random(), 0.0) - Vec3::new(1.0, 1.0, 0.0);
 
         if p.dot(&p) < 1.0 {
-            return p
+            return p;
         }
     }
 }

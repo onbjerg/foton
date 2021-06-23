@@ -1,11 +1,11 @@
-use ::core::ray::Ray;
-use ::core::vec3::Vec3;
-use ::scenery::hitable::Hit;
-use super::{Scatter, Scatterable, random_point_in_sphere};
+use super::{random_point_in_sphere, Scatter, Scatterable};
+use core::ray::Ray;
+use core::vec3::Vec3;
+use scenery::hitable::Hit;
 
 #[derive(Clone, Copy)]
 pub struct Lambertian {
-    pub albedo: Vec3
+    pub albedo: Vec3,
 }
 
 impl Scatterable for Lambertian {
@@ -14,7 +14,7 @@ impl Scatterable for Lambertian {
 
         Some(Scatter {
             ray: Ray::new(hit.point, target),
-            attenuation: self.albedo
+            attenuation: self.albedo,
         })
     }
 }

@@ -1,12 +1,12 @@
-use ::core::vec3::Vec3;
-use ::core::ray::Ray;
-use ::materials::Scatterable;
+use core::ray::Ray;
+use core::vec3::Vec3;
+use materials::Scatterable;
 
 pub struct Hit<'a> {
     pub t: f32,
     pub point: Vec3,
     pub normal: Vec3,
-    pub material: &'a Box<dyn Scatterable>
+    pub material: &'a Box<dyn Scatterable>,
 }
 
 pub trait Hitable: Sync {

@@ -1,13 +1,13 @@
 extern crate rand;
 
-use ::core::ray::Ray;
-use ::core::vec3::Vec3;
-use ::scenery::hitable::Hit;
 use super::{Scatter, Scatterable};
+use core::ray::Ray;
+use core::vec3::Vec3;
+use scenery::hitable::Hit;
 
 #[derive(Clone, Copy)]
 pub struct Diaelectric {
-    pub refraction_index: f32
+    pub refraction_index: f32,
 }
 
 /// Calculate the probability of reflection for a material at an angle
@@ -24,7 +24,7 @@ fn reflect(v: &Vec3, normal: &Vec3) -> Vec3 {
 }
 
 /// Refract a vector using Snell's law
-fn refract (v: &Vec3, normal: &Vec3, ni_over_nt: f32) -> Option<Vec3> {
+fn refract(v: &Vec3, normal: &Vec3, ni_over_nt: f32) -> Option<Vec3> {
     let unit_vector = v.normalize();
     let dt = unit_vector.dot(normal);
     let discriminant = 1.0 - ni_over_nt * ni_over_nt * (1.0 - dt * dt);
@@ -46,29 +46,27 @@ impl Scatterable for Diaelectric {
                 (
                     -1.0 * hit.normal,
                     refraction_index,
-                    refraction_index * ray.direction.dot(&hit.normal) / ray.direction.length()
+                    refraction_index * ray.direction.dot(&hit.normal) / ray.direction.length(),
                 )
             } else {
                 (
                     hit.normal,
                     1.0 / refraction_index,
-                    (-1.0 * ray.direction.dot(&hit.normal)) / ray.direction.length()
+                    (-1.0 * ray.direction.dot(&hit.normal)) / ray.direction.length(),
                 )
             }
         };
 
-        let ray_direction = match refract(
-            &ray.direction,
-            &params.0,
-            params.1
-        ) {
-            Some(refracted) if rand::random::<f32>() > shlick(params.2, refraction_index) => refracted,
-            _ => reflect(&ray.direction, &hit.normal)
+        let ray_direction = match refract(&ray.direction, &params.0, params.1) {
+            Some(refracted) if rand::random::<f32>() > shlick(params.2, refraction_index) => {
+                refracted
+            }
+            _ => reflect(&ray.direction, &hit.normal),
         };
 
         Some(Scatter {
             ray: Ray::new(hit.point, ray_direction),
-            attenuation
+            attenuation,
         })
     }
 }
